@@ -1,4 +1,4 @@
-# 🌊 Urban Hydro-Coupler
+# Urban Hydro-Coupler
 
 A Python framework that couples a regional hydrological model (e.g.
 [Wflow](https://github.com/Deltares/Wflow.jl), via the
