@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Urban Hydro-Coupler"
+type: software
+authors:
+  - name: "Abdullah Awan"
+repository-code: "https://github.com/awan-geospatial1/urban-hydro-coupler"
+license: MIT
+version: 0.1.0
+date-released: "2026-08-13"
+references:
+  - type: article
+    title: "PySWMM: The Python Interface to Stormwater Management Model (SWMM)"
+    authors:
+      - name: "B. E. McDonnell"
+    journal: "Journal of Open Source Software"
+    volume: 5
+    issue: 52
+    start: "2292"
+    year: 2020

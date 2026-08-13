@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urban-hydro-coupler"
+version = "0.1.0"
+description = "Couples regional hydrological model output (e.g. Wflow) with EPA SWMM for urban flood simulation."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Abdullah Awan" }]
+
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "pyswmm>=1.3.0",
+    "streamlit>=1.30",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "plotly>=5.18",
+    "folium>=0.15",
+    "matplotlib>=3.7",
+    "xarray>=2023.1",
+    "netCDF4>=1.6",
+    "pyyaml>=6.0",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "pytest-xdist>=3.5",
+    "black>=24.0",
+    "ruff>=0.4",
+]
+swmmx = ["swmmx"]
+
+[project.urls]
+Repository = "https://github.com/awan-geospatial1/urban-hydro-coupler"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
