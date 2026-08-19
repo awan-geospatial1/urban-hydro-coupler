@@ -89,6 +89,59 @@ docker compose -f docker/docker-compose.yml up --build
 This starts the dashboard on `http://localhost:8501` and the API on
 `http://localhost:8000`.
 
+## AI / ML flood-risk surrogate
+
+[#ai-ml-flood-risk-surrogate](#ai-ml-flood-risk-surrogate)
+
+The coupled Wflow → SWMM simulation is physically accurate but too slow to
+run for every scenario in a large ensemble (hundreds of downscaled climate
+futures, or an interactive "what if the storm is 20% bigger" control). The
+`src/ml` package adds a lightweight **ML surrogate model** that learns the
+mapping from streamflow-hydrograph features (peak flow, flashiness, rate of
+rise, time-to-peak, etc.) to the coupled model's peak node depth, so new
+scenarios can be **screened in milliseconds** instead of minutes. It's a
+screening tool, not a replacement — confirm anything it flags as
+medium/high risk with a full coupled run.
+
+### Train the surrogate
+
+```
+python scripts/train_surrogate.py \
+    --swmm data/raw/example_model.inp \
+    --node Node1 \
+    --n-scenarios 60 \
+    --out models/flood_surrogate.joblib
+```
+
+This generates synthetic streamflow scenarios spanning calm baseflow to
+sharp storm-driven hydrographs, runs each through the real coupled
+simulation (ground truth), and fits a gradient-boosted regressor on the
+resulting (features → peak depth) pairs. In practice, swap in your own
+scenario generator (e.g. an ensemble of real Wflow runs) for better,
+catchment-specific accuracy.
+
+### Use the surrogate
+
+Programmatically:
+
+```python
+from src.ml.surrogate import FloodSurrogateModel
+
+model = FloodSurrogateModel.load("models/flood_surrogate.joblib")
+prediction = model.predict_from_series(wflow_flow_series)
+print(prediction)  # {'predicted_max_depth': 0.42, 'risk_level': 'medium', 'features': {...}}
+```
+
+Via the API (`POST /predict`, alongside the existing `/simulate`):
+
+```
+curl -X POST http://localhost:8000/predict \
+    -F "wflow_file=@data/processed/wflow_output.csv"
+```
+
+Via the dashboard: upload a Wflow CSV and click **"⚡ Instant AI Risk
+Screening"** for an instant prediction, without running SWMM.
+
 ## Input format
 
 The Wflow output CSV must have two columns:
@@ -116,14 +169,16 @@ skip automatically if it isn't installed.
 ```
 urban-hydro-coupler/
 ├── src/coupler/        # HydroCoupler core, model runner, utils
-├── src/api/             # FastAPI app
-├── src/dashboard/       # Streamlit dashboard
-├── scripts/              # CLI entry points
-├── tests/                 # pytest suite
-├── data/raw/               # sample SWMM .inp
-├── data/processed/          # generated Wflow CSVs (gitignored)
-├── docker/                    # Dockerfile + docker-compose.yml
-└── docs/                       # architecture and reference docs
+├── src/ml/              # ML flood-risk surrogate (features + model)
+├── src/api/               # FastAPI app (/simulate, /predict)
+├── src/dashboard/          # Streamlit dashboard
+├── scripts/                 # CLI entry points (incl. train_surrogate.py)
+├── tests/                     # pytest suite
+├── data/raw/                    # sample SWMM .inp
+├── data/processed/                # generated Wflow CSVs (gitignored)
+├── models/                          # trained surrogate models (gitignored)
+├── docker/                            # Dockerfile + docker-compose.yml
+└── docs/                                # architecture and reference docs
 ```
 
 ## Related work
