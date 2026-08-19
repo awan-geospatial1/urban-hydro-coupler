@@ -1,0 +1,23 @@
+# Default configuration for the Urban Hydro-Coupler.
+# Override any of these via CLI flags or environment variables as needed.
+
+swmm:
+  default_input: data/raw/example_model.inp
+  target_node: Node1
+
+wflow:
+  default_output: data/processed/wflow_output.csv
+  time_column: time
+  streamflow_column: streamflow
+
+validation:
+  interpolate_missing: true
+  clip_negative_flows: true
+  outlier_std_threshold: 3.0
+
+dashboard:
+  port: 8501
+
+api:
+  host: 0.0.0.0
+  port: 8000
